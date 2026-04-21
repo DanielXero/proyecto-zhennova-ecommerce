@@ -1,17 +1,15 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 
 // Middlewares
 app.use(express.json());
+app.use(cors());  
 
-// Prueba para verificar que la API responde
-app.get('/api/health', (req, res) => {
-    res.status(200).json({ 
-        status: 'ok', 
-        message: 'Zhennova API activa con Sequelize' 
-    });
-});
+const productoRoutes = require('./routes/productoRoutes');
 
+
+app.use('/api/productos', productoRoutes);
 
 
 module.exports = app;
