@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-// Estas rutas aún no existen en tu backend, pero las dejamos preparadas
+
 const API_AUTH = 'http://localhost:3000/api/auth'
 
 export const loginUser = createAsyncThunk(
