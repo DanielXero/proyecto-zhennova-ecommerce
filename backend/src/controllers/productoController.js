@@ -1,4 +1,5 @@
 const { Producto, Categoria } = require('../models/associations');
+const Joi = require('joi');
 
 
 const listarProductos = async (req, res) => {
