@@ -13,7 +13,16 @@ export const loginUser = createAsyncThunk(
       localStorage.setItem('user', JSON.stringify(response.data.user))
       return response.data
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Error al iniciar sesión')
+      const errorData = error.response?.data;
+      if (errorData && errorData.detalles) {
+        return rejectWithValue({
+          message: errorData.error,
+          detalles: errorData.detalles,
+        });
+      }
+      return rejectWithValue({
+        message: errorData?.error || "Error al iniciar sesión",
+      });
     }
   }
 )
@@ -25,7 +34,11 @@ export const registerUser = createAsyncThunk(
       const response = await axios.post(`${API_AUTH}/register`, userData)
       return response.data
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Error al registrarse')
+      const errorData = error.response?.data
+      if (errorData && errorData.detalles) {
+        return rejectWithValue({ message: errorData.error, detalles: errorData.detalles });
+      }
+      return rejectWithValue({ message: errorData?.error || 'Error al registrarse' })
     }
   }
 )
@@ -36,6 +49,7 @@ const initialState = {
   isAuth: !!localStorage.getItem('token'),
   loading: false,
   error: null,
+  errorDetails: null,
 }
 
 const usersSlice = createSlice({
@@ -50,6 +64,7 @@ const usersSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null
+      state.errorDetails = null
     }
   },
   extraReducers: (builder) => {
@@ -57,6 +72,7 @@ const usersSlice = createSlice({
       .addCase(loginUser.pending, (state) => {
         state.loading = true
         state.error = null
+        state.errorDetails = null
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false
@@ -67,10 +83,12 @@ const usersSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+        state.errorDetails = action.payload?.detalles
       })
       .addCase(registerUser.pending, (state) => {
         state.loading = true
         state.error = null
+        state.errorDetails = null
       })
       .addCase(registerUser.fulfilled, (state) => {
         state.loading = false
@@ -78,6 +96,7 @@ const usersSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+        state.errorDetails = action.payload?.detalles
       })
   }
 })

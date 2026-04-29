@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { useDispatch, useSelector } from 'react-redux'
-import { registerUser, clearError } from '../store/usersSlice'
-import { useNavigate, Link } from 'react-router-dom'
-import { BiUserPlus, BiUser, BiEnvelope, BiLockAlt, BiIdCard } from 'react-icons/bi'
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser, clearError } from '../store/usersSlice';
+import { useNavigate, Link } from 'react-router-dom';
+import { BiUserPlus, BiUser, BiEnvelope, BiLockAlt, BiIdCard } from 'react-icons/bi';
 
 const Register = () => {
   const { register, handleSubmit, formState: { errors } } = useForm()
@@ -38,8 +38,14 @@ const Register = () => {
         </div>
 
         {error && (
-          <div className="alert alert-danger py-2">
-            <small>{typeof error === 'string' ? error : 'Error al registrarse'}</small>
+          <div className="alert alert-danger alert-dismissible fade show py-2" role="alert">
+            <strong>{error}</strong>
+            {errorDetails && errorDetails.length > 0 && (
+              <ul className="mb-0 mt-2">
+                {errorDetails.map((err, idx) => <li key={idx}>{err}</li>)}
+              </ul>
+            )}
+            <button type="button" className="btn-close" onClick={() => dispatch(clearError())}></button>
           </div>
         )}
 

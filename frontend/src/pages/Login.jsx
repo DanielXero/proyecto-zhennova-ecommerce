@@ -34,8 +34,14 @@ const Login = () => {
         </div>
 
         {error && (
-          <div className="alert alert-danger py-2">
-            <small>{typeof error === 'string' ? error : 'Error al iniciar sesión'}</small>
+          <div className="alert alert-danger alert-dismissible fade show py-2" role="alert">
+            <strong>{error}</strong>
+            {errorDetails && errorDetails.length > 0 && (
+              <ul className="mb-0 mt-2">
+                {errorDetails.map((err, idx) => <li key={idx}>{err}</li>)}
+              </ul>
+            )}
+            <button type="button" className="btn-close" onClick={() => dispatch(clearError())}></button>
           </div>
         )}
 
