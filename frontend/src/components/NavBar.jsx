@@ -72,23 +72,37 @@ const { user, isAuth } = useSelector((state) => state.users);
             </form>
             
              {isAuth ? (
-              // SI ESTÁ LOGUEADO: Muestra Dropdown con Nombre y Salir
-              <div className="dropdown">
-                <button 
-                  className="btn btn-outline-light dropdown-toggle d-flex align-items-center gap-2" 
-                  type="button" 
-                  data-bs-toggle="dropdown" 
-                  aria-expanded="false"
+                       <div className="dropdown">
+                <button
+                  className="btn btn-outline-light dropdown-toggle d-flex align-items-center gap-2"
+                  type="button"
+                  data-bs-toggle="dropdown"
                 >
                   <i className="bi bi-person-circle"></i>
-                  {/* Mostramos el nombre o username */}
                   <span>{user?.username || user?.name || "Usuario"}</span>
                 </button>
                 <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                  <li><span className="dropdown-item-text small">{user?.email}</span></li>
-                  <li><hr className="dropdown-divider" /></li>
                   <li>
-                    <button className="dropdown-item text-danger" onClick={handleLogout}>
+                    <span className="dropdown-item-text small">
+                      {user?.email}
+                    </span>
+                  </li>
+                  <li>
+                    <hr className="dropdown-divider" />
+                  </li>
+                  {user?.rol === "admin" && (
+                    <li>
+                      <Link className="dropdown-item" to="/admin/productos">
+                        <i className="bi bi-grid me-2"></i> Panel de
+                        Administración
+                      </Link>
+                    </li>
+                  )}
+                  <li>
+                    <button
+                      className="dropdown-item text-danger"
+                      onClick={handleLogout}
+                    >
                       Cerrar Sesión
                     </button>
                   </li>
