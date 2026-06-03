@@ -9,7 +9,7 @@ const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm()
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { isAuth, error, loading } = useSelector((state) => state.users)
+  const { isAuth, error, errorDetails, loading } = useSelector((state) => state.users)
 
   useEffect(() => {
     if (isAuth) navigate('/')

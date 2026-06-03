@@ -8,6 +8,7 @@ const Localidad = require('./Localidad');
 const Provincia = require('./Provincia');
 const DetallePedido = require('./DetallePedido');
 const UsuarioProducto = require('./UsuarioProducto');
+const FormaPago = require('./FormaPago');
 
 
 // RELACIÓN ROL - USUARIO (1:N)
@@ -47,6 +48,10 @@ DetallePedido.belongsTo(Pedido, { foreignKey: 'id_pedido' });
 Producto.hasMany(DetallePedido, { foreignKey: 'id_producto' });
 DetallePedido.belongsTo(Producto, { foreignKey: 'id_producto' });
 
+// RELACIÓN FORMA_PAGO - PEDIDO (1:N)
+FormaPago.hasMany(Pedido, { foreignKey: 'id_forma_pago' });
+Pedido.belongsTo(FormaPago, { foreignKey: 'id_forma_pago' });
+
 
 
 // RELACIONES PROVINCIA - LOCALIDAD (1:N)
@@ -58,8 +63,8 @@ Localidad.hasMany(Direccion, { foreignKey: 'id_localidad' });
 Direccion.belongsTo(Localidad, { foreignKey: 'id_localidad' });
 
 // RELACIONES USUARIO - DIRECCIÓN (1:N)
-Usuario.hasMany(Direccion, { foreignKey: 'id_direccion' });
-Direccion.belongsTo(Usuario, { foreignKey: 'id_direccion' });
+Usuario.hasMany(Direccion, { foreignKey: 'id_usuario' });
+Direccion.belongsTo(Usuario, { foreignKey: 'id_usuario' });
 
 
 
@@ -73,5 +78,6 @@ module.exports = {
   UsuarioProducto,
   Direccion,
   Localidad,
-  Provincia
+  Provincia,
+  FormaPago
 };

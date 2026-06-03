@@ -4,6 +4,7 @@ const { sequelize } = require("../config/database");
 const Pedido = sequelize.define("Pedido", {
     id_pedido: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
     id_usuario: { type: DataTypes.INTEGER, allowNull: false },
+    id_forma_pago: { type: DataTypes.INTEGER, allowNull: false },
     total: {
       type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
