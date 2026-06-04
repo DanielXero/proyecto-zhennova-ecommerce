@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { realizarPedido } = require('../controllers/pedidoController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { verificarToken } = require('../middlewares/authMiddleware');
 
 // Ruta protegida por JWT para confirmar la compra
 router.post('/checkout', verificarToken, realizarPedido);
