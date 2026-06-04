@@ -17,6 +17,7 @@ const Producto = sequelize.define("Producto", {
       validate: { min: 0 }
     },
     id_categoria: { type: DataTypes.INTEGER, allowNull: false },
+    imagen_url: { type: DataTypes.STRING, allowNull: true },
   }, {
     tableName: "productos",
     timestamps: true,

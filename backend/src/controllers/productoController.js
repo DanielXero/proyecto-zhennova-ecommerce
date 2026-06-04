@@ -99,6 +99,7 @@ const crearProducto = async (req, res) => {
     }
 
     const { nombre, descripcion, precio, stock, id_categoria } = value;
+    const imagen_url = req.file ? `/uploads/${req.file.filename}` : null;
 
     // 2. Verificar que la categoría exista
     const categoria = await Categoria.findByPk(id_categoria);
@@ -116,6 +117,7 @@ const crearProducto = async (req, res) => {
       precio,
       stock,
       id_categoria,
+      imagen_url
     });
 
     res.status(201).json({
