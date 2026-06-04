@@ -8,7 +8,8 @@ const realizarPedido = async (req, res) => {
 
     try {
         const { id_forma_pago } = req.body;
-        const id_usuario = req.usuario.id; 
+        const id_usuario = req.usuario.id_usuario;
+        
 
         // 1. Obtener los productos del carrito del usuario
         const carrito = await UsuarioProducto.findAll({
