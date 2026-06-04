@@ -12,7 +12,7 @@ const listarProductos = async (req, res) => {
                     attributes: ['nombre']  // solo traemos el nombre de la categoría
                 }
             ],
-            attributes: ['id_producto', 'nombre', 'descripcion', 'precio', 'stock'],
+           attributes: ['id_producto', 'nombre', 'descripcion', 'precio', 'stock', 'id_categoria', 'imagen_url'],
             order: [['nombre', 'ASC']]
         });
 
@@ -139,7 +139,7 @@ const actualizarProductoSchema = Joi.object({
   precio: Joi.number().positive().precision(2).optional(),
   stock: Joi.number().integer().min(0).optional(),
   id_categoria: Joi.number().integer().positive().optional()
-}).min(1); // al menos un campo para actualizar
+}).min(1).unknown(true);; // al menos un campo para actualizar
 
 // Actualizar producto (solo admin) – con validación Joi
 const actualizarProducto = async (req, res) => {
@@ -182,6 +182,10 @@ const actualizarProducto = async (req, res) => {
     if (descripcion !== undefined) producto.descripcion = descripcion;
     if (precio !== undefined) producto.precio = precio;
     if (stock !== undefined) producto.stock = stock;
+
+    if (req.file) {
+      producto.imagen_url = `/uploads/${req.file.filename}`;
+    }
 
     await producto.save();
 

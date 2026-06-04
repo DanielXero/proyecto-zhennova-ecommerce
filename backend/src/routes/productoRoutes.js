@@ -8,12 +8,9 @@ const router = express.Router();
 // Rutas públicas
 router.get('/', listarProductos);
 router.get('/:id', obtenerProducto);
-router.post('/', verificarToken, verificarAdmin, upload.single('imagen'), crearProducto);
-
-
 // Rutas protegidas (solo admin)
-router.post('/', verificarToken, verificarAdmin, crearProducto);
-router.put('/:id', verificarToken, verificarAdmin, actualizarProducto);
+router.post('/', verificarToken, verificarAdmin, upload.single('imagen'), crearProducto);
+router.put('/:id', verificarToken, verificarAdmin, upload.single('imagen'), actualizarProducto);
 router.delete('/:id', verificarToken, verificarAdmin, eliminarProducto);
 
 

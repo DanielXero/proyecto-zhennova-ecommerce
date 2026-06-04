@@ -11,11 +11,19 @@ import {
 } from '../store/adminProductsSlice';
 import { Modal, Button, Form, Alert, Spinner } from 'react-bootstrap';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import axios from 'axios';
 
 const AdminPanel = () => {
   const dispatch = useDispatch();
   const { products, loading, error, errorDetails, currentProduct } = useSelector((state) => state.adminProducts);
+  
   const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // Estados para manejar las categorías y la imagen
+  const [categorias, setCategorias] = useState([]);
+  const [imagenFile, setImagenFile] = useState(null);
+
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -23,10 +31,23 @@ const AdminPanel = () => {
     stock: '',
     id_categoria: '',
   });
-  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAdminProducts());
+    
+    
+    const fetchCategorias = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/api/categorias');
+        if (res.data && res.data.success) {
+          setCategorias(res.data.data); 
+        }
+      } catch (error) {
+        console.error("Error al cargar las categorías desde el servidor:", error);
+        setCategorias([]); 
+      }
+    };
+    fetchCategorias();
   }, [dispatch]);
 
   useEffect(() => {
@@ -49,6 +70,7 @@ const AdminPanel = () => {
         stock: '',
         id_categoria: '',
       });
+      setImagenFile(null);
     }
   }, [currentProduct]);
 
@@ -59,6 +81,7 @@ const AdminPanel = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setImagenFile(null); // Limpiar archivo seleccionado
     dispatch(clearCurrentProduct());
     dispatch(clearError());
   };
@@ -67,21 +90,34 @@ const AdminPanel = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    setImagenFile(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = {
-      ...formData,
-      precio: parseFloat(formData.precio),
-      stock: parseInt(formData.stock, 10),
-      id_categoria: parseInt(formData.id_categoria, 10),
-    };
+    
+    // Construir FormData para poder enviar archivos e información de texto juntos
+    const data = new FormData();
+    data.append('nombre', formData.nombre);
+    data.append('descripcion', formData.descripcion);
+    data.append('precio', formData.precio);
+    data.append('stock', formData.stock);
+    data.append('id_categoria', formData.id_categoria);
+    
+    // Solo agregamos la imagen si el usuario seleccionó un archivo
+    if (imagenFile) {
+      data.append('imagen', imagenFile); 
+    }
+
     if (isEditing) {
       await dispatch(updateProduct({ id: currentProduct.id_producto, productData: data }));
     } else {
       await dispatch(createProduct(data));
     }
+    
     handleCloseModal();
-    dispatch(fetchAdminProducts()); // refrescar lista
+    dispatch(fetchAdminProducts()); 
   };
 
   const handleDelete = (id) => {
@@ -119,12 +155,12 @@ const AdminPanel = () => {
         </div>
       ) : (
         <div className="table-responsive">
-          <table className="table table-dark table-hover">
+          <table className="table table-dark table-hover align-middle">
             <thead>
               <tr>
                 <th>ID</th>
+                <th>Foto</th>
                 <th>Nombre</th>
-                <th>Descripción</th>
                 <th>Precio</th>
                 <th>Stock</th>
                 <th>Categoría</th>
@@ -135,11 +171,21 @@ const AdminPanel = () => {
               {products.map((prod) => (
                 <tr key={prod.id_producto}>
                   <td>{prod.id_producto}</td>
+                  <td>
+                    {prod.imagen_url ? (
+                      <img 
+                        src={`http://localhost:3000${prod.imagen_url}`} 
+                        alt={prod.nombre} 
+                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} 
+                      />
+                    ) : (
+                      <span className="text-muted small">Sin imagen</span>
+                    )}
+                  </td>
                   <td>{prod.nombre}</td>
-                  <td>{prod.descripcion?.substring(0, 50)}</td>
                   <td>${prod.precio}</td>
                   <td>{prod.stock}</td>
-                  <td>{prod.Categorium?.nombre}</td>
+                  <td>{prod.Categorium?.nombre || prod.id_categoria}</td>
                   <td>
                     <Button variant="warning" size="sm" className="me-2" onClick={() => dispatch(setCurrentProduct(prod))}>
                       <FaEdit />
@@ -155,6 +201,7 @@ const AdminPanel = () => {
         </div>
       )}
 
+      {/* Modal de Creación / Edición */}
       <Modal show={showModal} onHide={handleCloseModal} size="lg" centered>
         <Modal.Header closeButton className="bg-dark text-white border-secondary">
           <Modal.Title>{isEditing ? 'Editar Producto' : 'Nuevo Producto'}</Modal.Title>
@@ -172,6 +219,7 @@ const AdminPanel = () => {
                 className="bg-dark text-white border-secondary"
               />
             </Form.Group>
+            
             <Form.Group className="mb-3">
               <Form.Label>Descripción</Form.Label>
               <Form.Control
@@ -183,47 +231,87 @@ const AdminPanel = () => {
                 className="bg-dark text-white border-secondary"
               />
             </Form.Group>
+            
+            <div className="row">
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
+                  <Form.Label>Precio</Form.Label>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    name="precio"
+                    value={formData.precio}
+                    onChange={handleChange}
+                    required
+                    className="bg-dark text-white border-secondary"
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-md-6">
+                <Form.Group className="mb-3">
+                  <Form.Label>Stock</Form.Label>
+                  <Form.Control
+                    type="number"
+                    name="stock"
+                    value={formData.stock}
+                    onChange={handleChange}
+                    required
+                    className="bg-dark text-white border-secondary"
+                  />
+                </Form.Group>
+              </div>
+            </div>
+
             <Form.Group className="mb-3">
-              <Form.Label>Precio</Form.Label>
-              <Form.Control
-                type="number"
-                step="0.01"
-                name="precio"
-                value={formData.precio}
-                onChange={handleChange}
-                required
-                className="bg-dark text-white border-secondary"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Stock</Form.Label>
-              <Form.Control
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                required
-                className="bg-dark text-white border-secondary"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Categoría (ID)</Form.Label>
-              <Form.Control
-                type="number"
+              <Form.Label>Categoría</Form.Label>
+              <Form.Select
                 name="id_categoria"
                 value={formData.id_categoria}
                 onChange={handleChange}
                 required
                 className="bg-dark text-white border-secondary"
-              />
-              <Form.Text className="text-secondary">
-                IDs: 1=Procesadores, 2=Placas de Video, 3=Memorias RAM
-              </Form.Text>
+              >
+                <option value="">Seleccione una categoría</option>
+                {categorias.map((cat) => (
+                  <option key={cat.id_categoria} value={cat.id_categoria}>
+                    {cat.nombre}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
+
+            {/* Previsualización de la imagen al editar */}
+            {isEditing && currentProduct?.imagen_url && (
+              <div className="mb-3 p-3 bg-secondary bg-opacity-25 rounded text-center border border-secondary">
+                <Form.Label className="d-block text-white mb-2">Imagen Actual:</Form.Label>
+                <img 
+                  src={`http://localhost:3000${currentProduct.imagen_url}`} 
+                  alt="Actual" 
+                  style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #555' }} 
+                />
+                <small className="d-block text-muted mt-2">
+                  (Si no subís una nueva foto, se mantendrá esta)
+                </small>
+              </div>
+            )}
+
+            <Form.Group className="mb-3">
+              <Form.Label>{isEditing ? 'Reemplazar Imagen (Opcional)' : 'Imagen del Producto'}</Form.Label>
+              <Form.Control
+                type="file"
+                name="imagen"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="bg-dark text-white border-secondary"
+              />
+            </Form.Group>
+
           </Modal.Body>
           <Modal.Footer className="border-secondary">
             <Button variant="secondary" onClick={handleCloseModal}>Cancelar</Button>
-            <Button variant="primary" type="submit">{isEditing ? 'Actualizar' : 'Crear'}</Button>
+            <Button variant="primary" type="submit">
+              {isEditing ? 'Guardar Cambios' : 'Crear Producto'}
+            </Button>
           </Modal.Footer>
         </Form>
       </Modal>
