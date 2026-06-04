@@ -1,4 +1,4 @@
-// frontend/src/store/cartSlice.js
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
