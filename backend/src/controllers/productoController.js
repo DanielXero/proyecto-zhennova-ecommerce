@@ -1,43 +1,59 @@
-const { Producto, Categoria } = require('../models/associations');
-const Joi = require('joi');
-
+const { Producto, Categoria } = require("../models/associations");
+const Joi = require("joi");
+const { Op } = require("sequelize");
 
 const listarProductos = async (req, res) => {
-    try {
-        // Obtener todos los productos 
-        const productos = await Producto.findAll({
-            include: [
-                {
-                    model: Categoria,
-                    attributes: ['nombre']  // solo traemos el nombre de la categoría
-                }
-            ],
-           attributes: ['id_producto', 'nombre', 'descripcion', 'precio', 'stock', 'id_categoria', 'imagen_url'],
-            order: [['nombre', 'ASC']]
-        });
+  try {
+    const { search, categoria } = req.query;
+    let whereClause = {};
 
-        
-        if (!productos || productos.length === 0) {
-            return res.status(200).json({
-                success: true,
-                message: 'No hay productos disponibles en el catálogo',
-                data: []
-            });
-        }
-
-        
-        res.status(200).json({
-            success: true,
-            count: productos.length,
-            data: productos
-        });
-    } catch (error) {
-        console.error('Error al listar productos:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error interno del servidor. No se pudo obtener el catálogo.'
-        });
+    if (search) {
+      whereClause.nombre = { [Op.iLike]: `%${search}%` };
     }
+    if (categoria) {
+      whereClause.id_categoria = categoria;
+    }
+    // Obtener todos los productos
+    const productos = await Producto.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: Categoria,
+          attributes: ["nombre"],
+        },
+      ],
+      attributes: [
+        "id_producto",
+        "nombre",
+        "descripcion",
+        "precio",
+        "stock",
+        "id_categoria",
+        "imagen_url",
+      ],
+      order: [["nombre", "ASC"]],
+    });
+
+    if (!productos || productos.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No hay productos disponibles en el catálogo",
+        data: [],
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: productos.length,
+      data: productos,
+    });
+  } catch (error) {
+    console.error("Error al listar productos:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor. No se pudo obtener el catálogo.",
+    });
+  }
 };
 // Obtener un producto por ID (público)
 const obtenerProducto = async (req, res) => {
@@ -117,7 +133,7 @@ const crearProducto = async (req, res) => {
       precio,
       stock,
       id_categoria,
-      imagen_url
+      imagen_url,
     });
 
     res.status(201).json({
@@ -135,11 +151,13 @@ const crearProducto = async (req, res) => {
 
 const actualizarProductoSchema = Joi.object({
   nombre: Joi.string().min(3).max(200).optional(),
-  descripcion: Joi.string().optional().allow(null, ''),
+  descripcion: Joi.string().optional().allow(null, ""),
   precio: Joi.number().positive().precision(2).optional(),
   stock: Joi.number().integer().min(0).optional(),
-  id_categoria: Joi.number().integer().positive().optional()
-}).min(1).unknown(true);; // al menos un campo para actualizar
+  id_categoria: Joi.number().integer().positive().optional(),
+})
+  .min(1)
+  .unknown(true); // al menos un campo para actualizar
 
 // Actualizar producto (solo admin) – con validación Joi
 const actualizarProducto = async (req, res) => {

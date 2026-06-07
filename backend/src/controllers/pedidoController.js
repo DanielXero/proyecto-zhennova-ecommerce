@@ -1,4 +1,4 @@
-const { Pedido, DetallePedido, Producto, UsuarioProducto } = require('../models/associations');
+const { Pedido, DetallePedido, Producto, UsuarioProducto, FormaPago } = require('../models/associations');
 const sequelize = require('../config/database');
 const { PagoEfectivo, PagoTarjeta, PagoTransferencia } = require('../strategies/pagoStrategy');
 
@@ -41,7 +41,7 @@ const realizarPedido = async (req, res) => {
 
         // 4. Registrar el Pedido
         const pedido = await Pedido.create({
-            monto_total,
+            total: monto_total,
             estado: 'Pendiente',
             id_usuario,
             id_forma_pago
@@ -80,6 +80,28 @@ const realizarPedido = async (req, res) => {
     }
 };
 
+const misPedidos = async (req, res) => {
+  try {
+    const id_usuario = req.usuario.id_usuario;
+    const pedidos = await Pedido.findAll({
+      where: { id_usuario },
+      include: [
+        {
+          model: DetallePedido,
+          include: [{ model: Producto, attributes: ['nombre', 'imagen_url'] }]
+        },
+        { model: FormaPago, attributes: ['nombre'] }
+      ],
+      order: [['fecha_creacion', 'DESC']]
+    });
+    res.json({ success: true, data: pedidos });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Error al obtener pedidos' });
+  }
+};
+
 module.exports = {
-    realizarPedido
+    realizarPedido,
+    misPedidos
 };
