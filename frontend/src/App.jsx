@@ -8,6 +8,7 @@ import { ProductList } from "./components/ProductList";
 import { Routes, Route } from "react-router-dom";
 import Cart from "./pages/Cart";
 import ThankYou from "./pages/ThankYou";
+import MisPedidos from "./pages/MyOrders";
 import "./App.css";
 
 function App() {
@@ -21,6 +22,14 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/gracias/:pedidoId" element={<ThankYou />} />
+          <Route
+            path="/mis-pedidos"
+            element={
+              <ProtectedRoute>
+                <MisPedidos />
+              </ProtectedRoute>
+            }
+          />
           
           <Route
             path="/admin/productos"
