@@ -1,28 +1,30 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchProducts } from '../store/productsSlice'
-import { ProductItem } from './ProductItem'
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts } from "../store/productsSlice";
+import { ProductItem } from "./ProductItem";
+import { ProductSkeleton } from "./ProductSkeleton";
+import { CategoryFilter } from "./CategoryFilter";
 
 export const ProductList = () => {
-  const dispatch = useDispatch()
-  const { products, loading, error } = useSelector((state) => state.products)
+  const dispatch = useDispatch();
+  const { searchTerm, selectedCategoria, products, loading, error } =
+    useSelector((state) => state.products);
 
   useEffect(() => {
-    if (loading === 'idle') {
-      dispatch(fetchProducts())
-    }
-  }, [dispatch, loading])
+    dispatch(
+      fetchProducts({ search: searchTerm, categoria: selectedCategoria }),
+    );
+  }, [dispatch, searchTerm, selectedCategoria]);
 
   const renderContent = () => {
-    if (loading === 'loading') {
+    if (loading === "loading") {
       return (
-        <div className="text-center py-5">
-          <div className="spinner-border text-cyan" role="status">
-            <span className="visually-hidden">Cargando...</span>
-          </div>
-          <p className="mt-2 text-secondary">Cargando productos...</p>
+        <div className="row">
+          {[1, 2, 3].map((i) => (
+            <ProductSkeleton key={i} />
+          ))}
         </div>
-      )
+      );
     }
 
     if (error) {
@@ -30,15 +32,16 @@ export const ProductList = () => {
         <div className="alert alert-danger text-center mt-4">
           <i className="bi bi-x-octagon-fill me-2"></i> Error: {error}
         </div>
-      )
+      );
     }
 
     if (products.length === 0) {
       return (
         <div className="alert alert-info text-center mt-4">
-          <i className="bi bi-info-circle-fill me-2"></i> No hay productos disponibles.
+          <i className="bi bi-info-circle-fill me-2"></i> No hay productos
+          disponibles.
         </div>
-      )
+      );
     }
 
     return (
@@ -47,18 +50,20 @@ export const ProductList = () => {
           <ProductItem key={product.id_producto} product={product} />
         ))}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="container py-5">
-      <h2 className="text-center text-white mb-4 fw-bold">
-        Nuestro Catálogo <span className="text-cyan">de Componentes</span>
-      </h2>
-      <p className="text-center text-secondary mb-5 lead">
-        Encuentra lo último en hardware y periféricos.
-      </p>
-      {renderContent()}
+      <div className="row">
+        <div className="col-md-3">
+          <CategoryFilter />
+        </div>
+        <div className="col-md-9">
+          <h2 className="text-white mb-4 fw-bold">Nuestro Catálogo</h2>
+          {renderContent()}
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
