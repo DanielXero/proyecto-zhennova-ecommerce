@@ -1,4 +1,3 @@
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -6,40 +5,52 @@ const getConfig = (getState) => ({
   headers: { Authorization: `Bearer ${getState().users.token}` }
 });
 
-// Thunks para el carrito
-export const fetchCarrito = createAsyncThunk('cart/fetchCarrito', async (_, { getState }) => {
-  const response = await axios.get('http://localhost:3000/api/carrito', getConfig(getState));
-  return response.data;
-});
-
-export const agregarAlCarrito = createAsyncThunk('cart/agregar', async (producto, { getState, dispatch, rejectWithValue }) => {
+// Thunks
+export const fetchCarrito = createAsyncThunk('cart/fetchCarrito', async (_, { getState, rejectWithValue }) => {
   try {
-    const idProductoSeguro = producto.id_producto || producto.id;
-    await axios.post('http://localhost:3000/api/carrito/agregar', { id_producto: idProductoSeguro, cantidad: 1 }, getConfig(getState));
-    dispatch(fetchCarrito());
-    return true; 
-  } catch (error) {
-    return rejectWithValue(error.response?.data || "Error al agregar al carrito");
+    const res = await axios.get('http://localhost:3000/api/carrito', getConfig(getState));
+    return res.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.error || 'Error al cargar carrito');
   }
 });
 
-export const actualizarCantidad = createAsyncThunk('cart/actualizar', async ({ id_producto, cantidad }, { getState, dispatch }) => {
-  await axios.put(`http://localhost:3000/api/carrito/actualizar/${id_producto}`, { cantidad }, getConfig(getState));
-  dispatch(fetchCarrito());
+export const agregarAlCarrito = createAsyncThunk('cart/agregar', async ({ id_producto, cantidad = 1 }, { getState, dispatch, rejectWithValue }) => {
+  try {
+    await axios.post('http://localhost:3000/api/carrito/agregar', { id_producto, cantidad }, getConfig(getState));
+    await dispatch(fetchCarrito());
+    return true;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.error || 'Error al agregar');
+  }
 });
 
-export const eliminarDelCarrito = createAsyncThunk('cart/eliminar', async (id_producto, { getState, dispatch }) => {
-  await axios.delete(`http://localhost:3000/api/carrito/eliminar/${id_producto}`, getConfig(getState));
-  dispatch(fetchCarrito());
+export const actualizarCantidad = createAsyncThunk('cart/actualizar', async ({ id_producto, cantidad }, { getState, dispatch, rejectWithValue }) => {
+  try {
+    await axios.put(`http://localhost:3000/api/carrito/actualizar/${id_producto}`, { cantidad }, getConfig(getState));
+    await dispatch(fetchCarrito());
+    return true;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.error || 'Error al actualizar');
+  }
 });
 
-// Thunk del checkout (el que ya teníamos)
+export const eliminarDelCarrito = createAsyncThunk('cart/eliminar', async (id_producto, { getState, dispatch, rejectWithValue }) => {
+  try {
+    await axios.delete(`http://localhost:3000/api/carrito/eliminar/${id_producto}`, getConfig(getState));
+    await dispatch(fetchCarrito());
+    return true;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.error || 'Error al eliminar');
+  }
+});
+
 export const procesarCheckout = createAsyncThunk('cart/procesarCheckout', async (id_forma_pago, { getState, rejectWithValue }) => {
   try {
-    const response = await axios.post('http://localhost:3000/api/pedidos/checkout', { id_forma_pago }, getConfig(getState));
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Error al procesar pedido');
+    const res = await axios.post('http://localhost:3000/api/pedidos/checkout', { id_forma_pago }, getConfig(getState));
+    return res.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.error || 'Error al procesar pedido');
   }
 });
 
@@ -51,12 +62,30 @@ const cartSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCarrito.fulfilled, (state, action) => { state.items = action.payload; })
+      // fetchCarrito
+      .addCase(fetchCarrito.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(fetchCarrito.fulfilled, (state, action) => { state.loading = false; state.items = action.payload; })
+      .addCase(fetchCarrito.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+      // agregarAlCarrito
+      .addCase(agregarAlCarrito.pending, (state) => { state.loading = true; })
+      .addCase(agregarAlCarrito.fulfilled, (state) => { state.loading = false; })
+      .addCase(agregarAlCarrito.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+      // actualizarCantidad
+      .addCase(actualizarCantidad.pending, (state) => { state.loading = true; })
+      .addCase(actualizarCantidad.fulfilled, (state) => { state.loading = false; })
+      .addCase(actualizarCantidad.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+      // eliminarDelCarrito
+      .addCase(eliminarDelCarrito.pending, (state) => { state.loading = true; })
+      .addCase(eliminarDelCarrito.fulfilled, (state) => { state.loading = false; })
+      .addCase(eliminarDelCarrito.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+      // procesarCheckout
+      .addCase(procesarCheckout.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(procesarCheckout.fulfilled, (state, action) => {
         state.loading = false;
         state.ultimoPedido = action.payload.id_pedido;
-        state.items = []; // Vaciamos el carrito visualmente al comprar
-      });
+        state.items = [];
+      })
+      .addCase(procesarCheckout.rejected, (state, action) => { state.loading = false; state.error = action.payload; });
   }
 });
 
