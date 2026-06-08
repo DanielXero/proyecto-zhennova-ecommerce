@@ -15,6 +15,14 @@
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
+      --primary: #00d2ff;
+  --primary-dark: #0099cc;
+  --dark-card: #1e1e2a;
+  --border-radius-card: 16px;
+  --shadow-sm: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-md: 0 10px 20px rgba(0,0,0,0.2);
+  --transition: all 0.25s ease;
+
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
@@ -52,6 +60,7 @@
 
 body {
   margin: 0;
+  font-family: 'Inter', system-ui, sans-serif; 
 }
 
 #root {

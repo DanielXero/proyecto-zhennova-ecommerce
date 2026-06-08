@@ -19,6 +19,22 @@ img {
   max-width: 100%;
   height: auto;
 }
+.product-card-hover {
+  transition: var(--transition);
+  border-radius: var(--border-radius-card);
+  background: var(--dark-card);
+  overflow: hidden;
+}
+.product-card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+}
+.card-img-top {
+  transition: transform 0.3s ease;
+}
+.product-card-hover:hover .card-img-top {
+  transform: scale(1.02);
+}
 
 /* Mejoras de legibilidad */
 .lead {
