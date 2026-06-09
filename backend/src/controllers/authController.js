@@ -134,21 +134,12 @@ const loginController = async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
-
 // Obtener perfil del usuario autenticado
-const obtenerPerfil = async (req, res) => {
+const getPerfil = async (req, res) => {
   try {
-    const id_usuario = req.usuario.id_usuario;
-    const usuario = await Usuario.findByPk(id_usuario, {
-      attributes: ['id_usuario', 'nombre', 'apellido', 'nombre_usuario', 'email', 'nro_telefono'],
-      include: [
-        {
-          model: Direccion,
-          include: [{ model: Localidad, include: [{ model: Provincia }] }],
-          limit: 1,
-          order: [['id_direccion', 'ASC']]
-        }
-      ]
+    const usuario = await Usuario.findByPk(req.usuario.id_usuario, {
+      attributes: { exclude: ['password_hash'] },
+      include: [{ model: Rol, attributes: ['nombre'] }]
     });
     if (!usuario) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -160,38 +151,49 @@ const obtenerPerfil = async (req, res) => {
   }
 };
 
-// Actualizar perfil del usuario
-const actualizarPerfil = async (req, res) => {
+// Actualizar perfil del usuario autenticado
+const updatePerfil = async (req, res) => {
   try {
-    const id_usuario = req.usuario.id_usuario;
-    const { nombre, apellido, nro_telefono, calle, nro_calle, piso, cod_postal, id_localidad } = req.body;
-
-    // Actualizar datos básicos del usuario
-    await Usuario.update(
-      { nombre, apellido, nro_telefono },
-      { where: { id_usuario } }
-    );
-
-    // Buscar o actualizar dirección
-    let direccion = await Direccion.findOne({ where: { id_usuario } });
-    if (direccion) {
-      await direccion.update({ calle, nro_calle, piso, cod_postal, id_localidad });
-    } else {
-      await Direccion.create({
-        id_usuario,
-        calle,
-        nro_calle,
-        piso: piso || null,
-        cod_postal,
-        id_localidad
-      });
+    const { nombre, apellido, nro_telefono, nombre_usuario, email } = req.body;
+    const usuario = await Usuario.findByPk(req.usuario.id_usuario);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    res.json({ success: true, message: 'Perfil actualizado correctamente' });
+    // Validar si el nuevo email o nombre_usuario ya están en uso por otro usuario
+    if (email && email !== usuario.email) {
+      const emailExists = await Usuario.findOne({ where: { email } });
+      if (emailExists) {
+        return res.status(400).json({ error: 'El email ya está registrado por otro usuario' });
+      }
+    }
+    if (nombre_usuario && nombre_usuario !== usuario.nombre_usuario) {
+      const userExists = await Usuario.findOne({ where: { nombre_usuario } });
+      if (userExists) {
+        return res.status(400).json({ error: 'El nombre de usuario ya está en uso' });
+      }
+    }
+
+    // Actualizar solo los campos permitidos
+    await usuario.update({
+      nombre: nombre || usuario.nombre,
+      apellido: apellido !== undefined ? apellido : usuario.apellido,
+      nro_telefono: nro_telefono !== undefined ? nro_telefono : usuario.nro_telefono,
+      nombre_usuario: nombre_usuario || usuario.nombre_usuario,
+      email: email || usuario.email
+    });
+
+    // Obtener el usuario actualizado sin contraseña
+    const updatedUser = await Usuario.findByPk(usuario.id_usuario, {
+      attributes: { exclude: ['password_hash'] },
+      include: [{ model: Rol, attributes: ['nombre'] }]
+    });
+
+    res.json({ success: true, data: updatedUser, message: 'Perfil actualizado correctamente' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al actualizar perfil' });
   }
 };
 
-module.exports = { registerController, loginController };
+module.exports = { registerController, loginController, getPerfil, updatePerfil };

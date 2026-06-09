@@ -11,6 +11,7 @@ import ThankYou from "./pages/ThankYou";
 import MisPedidos from "./pages/MyOrders";
 import Nosotros from "./pages/AboutUs";
 import Contacto from "./pages/Contact";
+import Profile from "./pages/Profile";
 import "./App.css";
 
 function App() {
@@ -48,6 +49,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Cart />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

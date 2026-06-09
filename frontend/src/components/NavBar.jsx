@@ -131,6 +131,7 @@ export const NavBar = () => {
                       </Link>
                     </li>
                   )}
+                  <li><Link className="dropdown-item" to="/perfil"><i className="bi bi-person-circle me-2"></i> Mi perfil</Link></li>
                   <li><Link className="dropdown-item" to="/mis-pedidos"><i className="bi bi-receipt me-2"></i> Mis pedidos</Link></li>
                   <li>
                     <button
