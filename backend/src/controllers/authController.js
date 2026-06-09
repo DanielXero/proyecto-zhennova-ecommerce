@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { Usuario, Rol } = require('../models/associations');
+const { Usuario, Rol , Direccion, Localidad, Provincia } = require('../models/associations');
 const Joi = require('joi');
 // Esquema para validar el registro de usuario
 const registerSchema = Joi.object({
@@ -135,6 +135,63 @@ const loginController = async (req, res) => {
   }
 };
 
+// Obtener perfil del usuario autenticado
+const obtenerPerfil = async (req, res) => {
+  try {
+    const id_usuario = req.usuario.id_usuario;
+    const usuario = await Usuario.findByPk(id_usuario, {
+      attributes: ['id_usuario', 'nombre', 'apellido', 'nombre_usuario', 'email', 'nro_telefono'],
+      include: [
+        {
+          model: Direccion,
+          include: [{ model: Localidad, include: [{ model: Provincia }] }],
+          limit: 1,
+          order: [['id_direccion', 'ASC']]
+        }
+      ]
+    });
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json({ success: true, data: usuario });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener perfil' });
+  }
+};
 
+// Actualizar perfil del usuario
+const actualizarPerfil = async (req, res) => {
+  try {
+    const id_usuario = req.usuario.id_usuario;
+    const { nombre, apellido, nro_telefono, calle, nro_calle, piso, cod_postal, id_localidad } = req.body;
+
+    // Actualizar datos básicos del usuario
+    await Usuario.update(
+      { nombre, apellido, nro_telefono },
+      { where: { id_usuario } }
+    );
+
+    // Buscar o actualizar dirección
+    let direccion = await Direccion.findOne({ where: { id_usuario } });
+    if (direccion) {
+      await direccion.update({ calle, nro_calle, piso, cod_postal, id_localidad });
+    } else {
+      await Direccion.create({
+        id_usuario,
+        calle,
+        nro_calle,
+        piso: piso || null,
+        cod_postal,
+        id_localidad
+      });
+    }
+
+    res.json({ success: true, message: 'Perfil actualizado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar perfil' });
+  }
+};
 
 module.exports = { registerController, loginController };

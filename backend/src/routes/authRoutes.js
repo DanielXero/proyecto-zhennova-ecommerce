@@ -4,5 +4,7 @@ const router = express.Router();
 
 router.post('/register', registerController);
 router.post('/login', loginController);
+router.get('/perfil', verificarToken, obtenerPerfil);
+router.put('/perfil', verificarToken, actualizarPerfil);
 
 module.exports = router;
