@@ -9,6 +9,8 @@ import { Routes, Route } from "react-router-dom";
 import Cart from "./pages/Cart";
 import ThankYou from "./pages/ThankYou";
 import MisPedidos from "./pages/MyOrders";
+import Nosotros from "./pages/AboutUs";
+import Contacto from "./pages/Contact";
 import "./App.css";
 
 function App() {
@@ -22,6 +24,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/gracias/:pedidoId" element={<ThankYou />} />
+          <Route path="/nosotros" element={<Nosotros />} />
+          <Route path="/contacto" element={<Contacto />} />
           <Route
             path="/mis-pedidos"
             element={
@@ -30,7 +34,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
+
           <Route
             path="/admin/productos"
             element={
