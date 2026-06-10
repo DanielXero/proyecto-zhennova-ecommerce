@@ -11,10 +11,10 @@ export const Footer = () => {
               Tu tienda de confianza para componentes de PC y periféricos.
             </p>
             <div className="d-flex gap-3">
-              <a href="#" className="text-white hover-cyan"><i className="bi bi-facebook fs-5"></i></a>
-              <a href="#" className="text-white hover-cyan"><i className="bi bi-twitter fs-5"></i></a>
-              <a href="#" className="text-white hover-cyan"><i className="bi bi-instagram fs-5"></i></a>
-              <a href="#" className="text-white hover-cyan"><i className="bi bi-whatsapp fs-5"></i></a>
+              <a href="https://www.facebook.com/?locale=es_LA" target='_blank' className="text-white hover-cyan"><i className="bi bi-facebook fs-5"></i></a>
+              <a href="https://x.com/?lang=es" target='_blank' className="text-white hover-cyan"><i className="bi bi-twitter fs-5"></i></a>
+              <a href="https://www.instagram.com/" target='_blank' className="text-white hover-cyan"><i className="bi bi-instagram fs-5"></i></a>
+              <a href="https://web.whatsapp.com/" target='_blank' className="text-white hover-cyan"><i className="bi bi-whatsapp fs-5"></i></a>
             </div>
           </div>
           <div className="col-lg-2 col-md-6">

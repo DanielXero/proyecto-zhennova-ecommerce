@@ -42,7 +42,7 @@ export const NavBar = () => {
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center" to="/">
           <img
-            src="/Logo completo mini.png"
+            src="/logo-zhennova.png"
             alt="ZhenNova Logo"
             style={{ height: "70px", marginRight: "0px" }}
           />
