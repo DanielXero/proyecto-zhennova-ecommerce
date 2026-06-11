@@ -123,13 +123,22 @@ export const NavBar = () => {
                   <li>
                     <hr className="dropdown-divider" />
                   </li>
-                  {user?.rol === "admin" && (
-                    <li>
-                      <Link className="dropdown-item" to="/admin/productos">
-                        <i className="bi bi-grid me-2"></i> Panel de
-                        Administración
-                      </Link>
-                    </li>
+                   {user?.rol === "admin" && (
+                    <>
+                      <li>
+                        <Link className="dropdown-item" to="/admin/productos">
+                          <i className="bi bi-grid me-2"></i> Panel de Productos
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="dropdown-item" to="/admin/clientes">
+                          <i className="bi bi-people me-2"></i> Gestionar Clientes
+                        </Link>
+                      </li>
+                      <li>
+                        <hr className="dropdown-divider" />
+                      </li>
+                    </>
                   )}
                   <li><Link className="dropdown-item" to="/perfil"><i className="bi bi-person-circle me-2"></i> Mi perfil</Link></li>
                   <li><Link className="dropdown-item" to="/mis-pedidos"><i className="bi bi-receipt me-2"></i> Mis pedidos</Link></li>

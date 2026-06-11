@@ -12,6 +12,7 @@ import MisPedidos from "./pages/MyOrders";
 import Nosotros from "./pages/AboutUs";
 import Contacto from "./pages/Contact";
 import Profile from "./pages/Profile";
+import AdminClientes from "./pages/AdminClientes";
 import "./App.css";
 
 function App() {
@@ -57,6 +58,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/clientes"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminClientes />
               </ProtectedRoute>
             }
           />

@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const categoriaRoutes = require('./routes/categoriaRoutes');
 const pedidoRoutes = require('./routes/pedidoRoutes');
 const carritoRoutes = require('./routes/carritoRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 // Middlewares
 app.use(express.json());
@@ -21,6 +22,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/carrito', carritoRoutes);
+app.use('/api/admin', adminRoutes);
+
 
 
 module.exports = app;
