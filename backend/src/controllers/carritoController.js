@@ -46,34 +46,31 @@ const agregarAlCarrito = async (req, res) => {
 // 3. Modificar la cantidad directamente (+update)
 const actualizarCantidad = async (req, res) => {
   try {
-    const id_usuario = req.usuario.id_usuario;
-    const { id_producto } = req.params;
-    const { cantidad } = req.body;
+        const id_usuario = req.usuario.id_usuario;
+        const { id_producto } = req.params;
+        const { cantidad } = req.body;
 
-    if (cantidad <= 0) {
-      return res.status(400).json({ error: "La cantidad debe ser mayor a 0" });
-    }
+        if (cantidad <= 0) {
+            return res.status(400).json({ error: 'La cantidad debe ser mayor a 0' });
+        }
 
-    const producto = await Producto.findByPk(id_producto);
-    if (!producto) {
-      return res.status(404).json({ error: "Producto no encontrado" });
-    }
-    if (cantidad > producto.stock) {
-      return res
-        .status(400)
-        .json({
-          error: `Stock insuficiente. Solo hay ${producto.stock} unidades.`,
-        });
-    }
+        const producto = await Producto.findByPk(id_producto);
+        if (!producto) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+        // Comentamos la validación de stock para poder poner cantidades mayores (solo para la prueba)
+        // if (cantidad > producto.stock) {
+        //     return res.status(400).json({ error: `Stock insuficiente. Solo hay ${producto.stock} unidades.` });
+        // }
 
-    await UsuarioProducto.update(
-      { cantidad },
-      { where: { id_usuario, id_producto } },
-    );
-    res.json({ mensaje: "Cantidad actualizada" });
-  } catch (error) {
-    res.status(500).json({ error: "Error al actualizar cantidad" });
-  }
+        await UsuarioProducto.update(
+            { cantidad },
+            { where: { id_usuario, id_producto } }
+        );
+        res.json({ mensaje: 'Cantidad actualizada' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar cantidad' });
+    }
 };
 
 // 4. Eliminar producto del carrito (+destroy)

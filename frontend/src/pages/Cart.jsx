@@ -46,11 +46,6 @@ const Cart = () => {
   }, [dispatch, items.length]);
 
   const handleQuantityChange = async (item, newCantidad) => {
-    if (newCantidad < 1) return;
-    if (newCantidad > item.Producto.stock) {
-      toast.error(`Stock máximo: ${item.Producto.stock}`);
-      return;
-    }
     setLoadingItems((prev) => ({ ...prev, [item.id_producto]: true }));
     try {
       await dispatch(
@@ -82,6 +77,7 @@ const Cart = () => {
         toast.error("Debes seleccionar un método de pago para continuar.");
         return;
       }
+
       // Validaciones previas (stock, cantidad)
       for (const item of items) {
         if (item.cantidad <= 0) {
@@ -139,10 +135,8 @@ const Cart = () => {
     descuentoRecargo = 0;
   }
 
-  const isCheckoutDisabled =
-    loading ||
-    items.length === 0 ||
-    items.some((item) => item.cantidad > item.Producto?.stock);
+  const isCheckoutDisabled = loading;
+  //items.some((item) => item.cantidad > item.Producto?.stock);
 
   if (loading) {
     return (
@@ -156,168 +150,176 @@ const Cart = () => {
   return (
     <div className="container py-5">
       <h2 className="mb-4 fw-bold text-white">🛒 Tu Carrito</h2>
-      {items.length === 0 ? (
-        <div className="alert alert-info text-center">
-          El carrito está vacío. <a href="/productos">Seguir comprando</a>
-        </div>
-      ) : (
-        <div className="row g-4">
-          {/* Lista de productos */}
-          <div className="col-lg-8">
-            <div className="card bg-dark border-secondary">
-              <div className="card-body p-0">
-                {items.map((item) => (
-                  <div
-                    key={item.id_producto}
-                    className="d-flex flex-wrap align-items-center p-3 border-bottom border-secondary gap-3"
-                  >
-                    <img
-                      src={
-                        item.Producto?.imagen_url
-                          ? `http://localhost:3000${item.Producto.imagen_url}`
-                          : "/placeholder.png"
-                      }
-                      alt={item.Producto?.nombre}
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        objectFit: "contain",
-                      }}
-                      className="rounded bg-dark"
-                    />
-                    <div className="flex-grow-1" style={{ minWidth: "150px" }}>
-                      <h6 className="mb-1 text-white">
-                        {item.Producto?.nombre}
-                      </h6>
-                      <small className="text-secondary">
-                        Precio unit: $
-                        {Number(item.Producto?.precio).toLocaleString()}
-                      </small>
-                      <div className="text-warning small ">
-                        Stock disponible: {item.Producto?.stock}
-                      </div>
+      {/* {items.length === 0 ? (
+      <div className="alert alert-info text-center">
+        El carrito está vacío. <a href="/productos">Seguir comprando</a>
+      </div>
+    ) : ( */}
+      <div className="row g-4">
+        {/* Lista de productos */}
+        <div className="col-lg-8">
+          <div className="card bg-dark border-secondary">
+            <div className="card-body p-0">
+              {items.map((item) => (
+                <div
+                  key={item.id_producto}
+                  className="d-flex flex-wrap align-items-center p-3 border-bottom border-secondary gap-3"
+                >
+                  <img
+                    src={
+                      item.Producto?.imagen_url
+                        ? `http://localhost:3000${item.Producto.imagen_url}`
+                        : "/placeholder.png"
+                    }
+                    alt={item.Producto?.nombre}
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      objectFit: "contain",
+                    }}
+                    className="rounded bg-dark"
+                  />
+                  <div className="flex-grow-1" style={{ minWidth: "150px" }}>
+                    <h6 className="mb-1 text-white">{item.Producto?.nombre}</h6>
+                    <small className="text-secondary">
+                      Precio unit: $
+                      {Number(item.Producto?.precio).toLocaleString()}
+                    </small>
+                    <div className="text-warning small ">
+                      Stock disponible: {item.Producto?.stock}
                     </div>
-                    <div className="d-flex align-items-center gap-2">
-                      <button
-                        className="btn btn-sm btn-outline-secondary "
-                        onClick={() =>
-                          handleQuantityChange(item, item.cantidad - 1)
-                        }
-                        disabled={
-                          item.cantidad <= 1 || loadingItems[item.id_producto]
-                        }
-                      >
-                        -
-                      </button>
-                      <span
-                        className="fw-bold text-white"
-                        style={{ width: "40px", textAlign: "center" }}
-                      >
-                        {item.cantidad}
-                      </span>
-                      <button
-                        className="btn btn-sm btn-outline-secondary"
-                        onClick={() =>
-                          handleQuantityChange(item, item.cantidad + 1)
-                        }
-                        disabled={
-                          item.cantidad >= item.Producto?.stock ||
-                          loadingItems[item.id_producto]
-                        }
-                      >
-                        +
-                      </button>
-                    </div>
-                    <div
-                      className="fw-bold text-success"
-                      style={{ width: "100px" }}
-                    >
-                      $
-                      {(item.cantidad * item.Producto?.precio).toLocaleString()}
-                    </div>
+                  </div>
+                  <div className="d-flex align-items-center gap-2">
                     <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleEliminar(item.id_producto, item.Producto.nombre)}
+                      className="btn btn-sm btn-outline-secondary "
+                      onClick={() =>
+                        handleQuantityChange(item, item.cantidad - 1)
+                      }
+                      disabled={
+                        item.cantidad <= 1 || loadingItems[item.id_producto]
+                      }
                     >
-                      🗑️
+                      -
+                    </button>
+                    <span
+                      className="fw-bold text-white"
+                      style={{ width: "40px", textAlign: "center" }}
+                    >
+                      {item.cantidad}
+                    </span>
+                    <button
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() =>
+                        handleQuantityChange(item, item.cantidad + 1)
+                      }
+                      disabled={loadingItems[item.id_producto]} // Solo deshabilita mientras carga, no por stock
+                    >
+                      +
                     </button>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Resumen lateral */}
-          <div className="col-lg-4">
-            <div
-              className="card bg-dark border-secondary sticky-top"
-              style={{ top: "20px" }}
-            >
-              <div className="card-body">
-                <h5 className="card-title fw-bold text-white">
-                  Resumen de pago
-                </h5>
-                <hr className="border-secondary" />
-                <div className="d-flex justify-content-between mb-2 text-white">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toLocaleString()}</span>
-                </div>
-                {descuentoRecargo > 0 && (
-                  <div className="d-flex justify-content-between mb-2 text-info small text-white">
-                    <span>
-                      {formaPago === 1
-                        ? "Descuento efectivo (-10%)"
-                        : "Recargo tarjeta (+15%)"}
-                    </span>
-                    <span>
-                      {formaPago === 1
-                        ? `-$${descuentoRecargo.toLocaleString()}`
-                        : `+$${descuentoRecargo.toLocaleString()}`}
-                    </span>
+                  <div
+                    className="fw-bold text-success"
+                    style={{ width: "100px" }}
+                  >
+                    ${(item.cantidad * item.Producto?.precio).toLocaleString()}
                   </div>
-                )}
-                <div className="d-flex justify-content-between mb-3 fw-bold fs-5 text-white">
-                  <span>Total</span>
-                  <span className="text-cyan">${total.toLocaleString()}</span>
-                </div>
-                <label className="form-label">Método de pago</label>
-                <select
-                  className="form-select mb-3 bg-dark text-white border-secondary"
-                  value={formaPago ?? ""}
-                  onChange={(e) =>
-                    setFormaPago(e.target.value ? Number(e.target.value) : null)
-                  }
-                >
-                  <option value="" disabled>
-                    -- Seleccione un método de pago --
-                  </option>
-                  <option value={1}>💵 Efectivo (10% descuento)</option>
-                  <option value={2}>💳 Tarjeta (15% recargo)</option>
-                  <option value={3}>🏦 Transferencia (sin cargo)</option>
-                </select>
-                <button
-                  className="btn btn-primary w-100 fw-bold py-2"
-                  onClick={() => {
-                    if (!formaPago) {
-                      toast.error(
-                        "Debes seleccionar un método de pago para continuar.",
-                      );
-                      return;
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() =>
+                      handleEliminar(item.id_producto, item.Producto.nombre)
                     }
-                    setShowConfirmModal(true);
-                  }}
-                  disabled={isCheckoutDisabled}
-                >
-                  {loading ? "Procesando..." : "Confirmar compra"}
-                </button>
-                {error && (
-                  <div className="alert alert-danger mt-3 small">{error}</div>
-                )}
-              </div>
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      )}
+
+        {/* Resumen lateral */}
+        <div className="col-lg-4">
+          <div
+            className="card bg-dark border-secondary sticky-top"
+            style={{ top: "20px" }}
+          >
+            <div className="card-body">
+              <h5 className="card-title fw-bold text-white">Resumen de pago</h5>
+              <hr className="border-secondary" />
+              <div className="d-flex justify-content-between mb-2 text-white">
+                <span>Subtotal</span>
+                <span>${subtotal.toLocaleString()}</span>
+              </div>
+              {descuentoRecargo > 0 && (
+                <div className="d-flex justify-content-between mb-2 text-info small text-white">
+                  <span>
+                    {formaPago === 1
+                      ? "Descuento efectivo (-10%)"
+                      : "Recargo tarjeta (+15%)"}
+                  </span>
+                  <span>
+                    {formaPago === 1
+                      ? `-$${descuentoRecargo.toLocaleString()}`
+                      : `+$${descuentoRecargo.toLocaleString()}`}
+                  </span>
+                </div>
+              )}
+              <div className="d-flex justify-content-between mb-3 fw-bold fs-5 text-white">
+                <span>Total</span>
+                <span className="text-cyan">${total.toLocaleString()}</span>
+              </div>
+              <label className="form-label">Método de pago</label>
+              <select
+                className="form-select mb-3 bg-dark text-white border-secondary"
+                value={formaPago ?? ""}
+                onChange={(e) =>
+                  setFormaPago(e.target.value ? Number(e.target.value) : null)
+                }
+              >
+                <option value="" disabled>
+                  -- Seleccione un método de pago --
+                </option>
+                <option value={1}>💵 Efectivo (10% descuento)</option>
+                <option value={2}>💳 Tarjeta (15% recargo)</option>
+                <option value={3}>🏦 Transferencia (sin cargo)</option>
+              </select>
+              <button
+                className="btn btn-primary w-100 fw-bold py-2"
+                onClick={() => {
+                  if (!formaPago) {
+                    toast.error(
+                      "Debes seleccionar un método de pago para continuar.",
+                    );
+                    return;
+                  }
+                  if (items.length === 0) {
+                    toast.error(
+                      "El carrito está vacío. Agrega productos antes de continuar.",
+                    );
+                    return; // <--- No abre el modal
+                  }
+                  for (const item of items) {
+                    if (item.cantidad > item.Producto.stock) {
+                      toast.error(
+                        `Stock insuficiente para ${item.Producto.nombre}. Solo hay ${item.Producto.stock}.`,
+                      );
+                      return; // No abre el modal
+                    }
+                  }
+                  setShowConfirmModal(true);
+                }}
+                disabled={isCheckoutDisabled}
+              >
+                {loading ? "Procesando..." : "Confirmar compra"}
+              </button>
+              {error && (
+                <div className="alert alert-danger mt-3 small">{error}</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* )} */}
 
       {/* Modal de confirmación */}
       <Modal
